@@ -20,26 +20,6 @@ export const success = (msg: string, data: any, meta?: object) => ({
   ...(meta && { meta }),
 });
 
-export async function Authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  try {
-    if (req.user) {
-      return next();
-    }
-
-    const authHeader = req.get('Authorization');
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      throw createError('Authorization Header not provided!', 403);
-    }
-
-    // @ts-ignore
-    return next();
-  } catch (e) {
-    return next(e);
-  }
-}
-
 export function errorHandler(error: AppError, req: any, res: Response, _next: any) {
   try {
     if (error.validations) {
