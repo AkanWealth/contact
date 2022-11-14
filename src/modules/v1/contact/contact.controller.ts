@@ -5,11 +5,13 @@ import { NextFunction, Request, Response } from 'express';
 import Logging from '../../common/Logging';
 import { Contacts, ContactsDetailsRow, ExcludedAttribs } from '../../../types';
 import assert from 'assert';
-import { parse } from 'csv-parse';
+// import { parse } from 'csv-parse';
 // import { uploadCsv } from '../../shared/ContactUpload';
 import fs from 'fs';
 import * as path from 'path';
 import * as csv from 'fast-csv';
+import { EOL } from 'os';
+import { parse } from '@fast-csv/parse';
 
 interface MulterRequest extends Request {
   file: any;
@@ -43,32 +45,33 @@ export const createContact = async (
 
 export const BulkUpload = async (
   req: MulterRequest,
-  res: Response
-  // next: NextFunction
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
       .pipe(csv.parse({ headers: true }))
-      // pipe the parsed input into a csv formatter
-      .pipe(csv.format<Contacts, ContactsDetailsRow>({ headers: true }))
-      // Using the transform function from the formatting stream
-      .transform((row, next): void => {
-        Contact.findById(row.phoneNumber, (err: any, contact: []) => {
-          return next(null, {
-            contactName: row.contactName,
-            phoneNumber: row.phoneNumber,
-          });
+      .on('error', (error) => console.error(error))
+      .on('data', async (row) => {
+        const contacts = await Contact.findOne({
+          phoneNumber: row.phoneNumber,
         });
-        // console.log('data', row);
-        // Contact.create(row);
-      })
-      .pipe(process.stdout)
-      .on('end', () => process.exit());
-    res.status(201).json('Contact uploaded');
-    // fs.unlinkSync(path.resolve(__dirname, 'assets', req.file.filename));
+        if (contacts) {
+          console.log('contacts', contacts);
+          await Contact.updateOne(
+            { phoneNumber: row.phoneNumber },
+            { ...row },
+            { new: true }
+          );
+        } else {
+          const val = await new Contact(row).save();
+          console.log('val', val);
+        }
+      });
+    res.status(201).json({ message: 'Contact uploaded' });
   } catch (err) {
     console.log(err);
-    // next();
+    next();
   }
 };
 
@@ -103,39 +106,20 @@ export const allContact = async (
   }
 };
 
-export const bulkUpdate = async (
+export const bulkDelete = async (
   req: Request,
   res: Response,
-  _next: NextFunction
+  next: NextFunction
 ) => {
+  const { phoneNumbers } = req.body;
   try {
-    fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
-      .pipe(csv.parse({ headers: true }))
-      // pipe the parsed input into a csv formatter
-      .pipe(csv.format<Contacts, ContactsDetailsRow>({ headers: true }))
-      // Using the transform function from the formatting stream
-      .transform((row, next): void => {
-        const arr = [];
-        const { phoneNumber } = req.body;
-        Contact.findOne({ phoneNumber }, (err: any, contact: Contacts) => {
-          if (contact) {
-            arr.push(contact);
-            console.log("contact", contact)
-          }
-          return next(null, {
-            contactName: row.contactName,
-            phoneNumber: row.phoneNumber,
-          });
-        });
-        console.log('data', row);
-        Contact.updateOne(row);
-      })
-      .pipe(process.stdout)
-      .on('end', () => process.exit());
-    res.status(201).json('Contact uploaded');
-  } catch (err) {
-    console.log(err);
-    // next();
+    const phones = phoneNumbers as string[];
+    const deletedContacts = phones.map(async (item) => {
+      await Contact.deleteOne({ phoneNumber: item });
+    });
+    return res.status(200).json(deletedContacts);
+  } catch (error) {
+    next(error);
   }
 };
 

@@ -9,11 +9,10 @@ import {
   updateContact,
   deleteContact,
   BulkUpload,
-  bulkUpdate,
 } from '../contact/contact.controller';
 // import { upload } from "../../common/upload"
-import multer from 'multer'
-const upload = multer({ dest: 'src/modules/v1/contact/assets/' })
+import multer from 'multer';
+const upload = multer({ dest: 'src/modules/v1/contact/assets/' });
 
 const app = express.Router();
 
@@ -21,17 +20,7 @@ app.get('/', allContact);
 app.get('/:contactId', getContact);
 app.delete('/:contactId', deleteContact);
 app.post('/', createContact);
-app.post('/upload', upload.single("file"), 
-BulkUpload
-)
-app.put('/upload', upload.single("file"), 
-bulkUpdate
-)
-app.patch(
-  '/:contactId',
-  contactUpdateRules(),
-  validate,
-  updateContact
-);
+app.post('/upload', upload.single('file'), BulkUpload);
+app.patch('/:contactId', contactUpdateRules(), validate, updateContact);
 
 export = app;
