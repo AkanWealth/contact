@@ -3,11 +3,11 @@ import { success } from '../../common/utils';
 import Contact from '../../../database/models/contact.model';
 import { NextFunction, Request, Response } from 'express';
 import Logging from '../../common/Logging';
-import { Contacts, ExcludedAttribs } from '../../../types';
+import { Contacts, ContactsDetailsRow, ExcludedAttribs } from '../../../types';
 import assert from 'assert';
 import { parse } from 'csv-parse';
-import { uploadCsv } from '../../shared/ContactUpload';
-import * as fs from 'fs';
+// import { uploadCsv } from '../../shared/ContactUpload';
+import fs from 'fs';
 import * as path from 'path';
 import * as csv from 'fast-csv';
 
@@ -43,35 +43,29 @@ export const createContact = async (
 
 export const BulkUpload = async (
   req: MulterRequest,
-  res: Response,
+  res: Response
   // next: NextFunction
 ) => {
   try {
     fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
-    .pipe(csv.parse({ headers: true }))
-    // pipe the parsed input into a csv formatter
-    .pipe(
-        csv.format<Contacts, Contacts>({ headers: true }),
-    )
-    // Using the transform function from the formatting stream
-    .transform((row, next): void => {
-        Contact.findById(+row._id, (err:any, contact: []) => {
-            return next(null, {
-                contactName: row.contactName,
-                phoneNumber: row.phoneNumber,
-            });
+      .pipe(csv.parse({ headers: true }))
+      // pipe the parsed input into a csv formatter
+      .pipe(csv.format<Contacts, ContactsDetailsRow>({ headers: true }))
+      // Using the transform function from the formatting stream
+      .transform((row, next): void => {
+        Contact.findById(row.phoneNumber, (err: any, contact: []) => {
+          return next(null, {
+            contactName: row.contactName,
+            phoneNumber: row.phoneNumber,
+          });
         });
-    })
-    .pipe(process.stdout)
-    .on('end', () => process.exit());
-    // console.log("hi")
-    // uploadCsv(__dirname + '/uploads/' + req.file.filename);
-    // console.log('File has imported :');
-    // const documentFile = req.file;
-    // return res
-    //   .status(200)
-    //   .json(documentFile);
-      // .json(success('Contact upload successfully', { documentFile }));
+        // console.log('data', row);
+        // Contact.create(row);
+      })
+      .pipe(process.stdout)
+      .on('end', () => process.exit());
+    res.status(201).json('Contact uploaded');
+    // fs.unlinkSync(path.resolve(__dirname, 'assets', req.file.filename));
   } catch (err) {
     console.log(err);
     // next();
@@ -106,6 +100,42 @@ export const allContact = async (
       .json(success('Books retrieved successfully', allBook));
   } catch (error) {
     return next(error);
+  }
+};
+
+export const bulkUpdate = async (
+  req: Request,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
+      .pipe(csv.parse({ headers: true }))
+      // pipe the parsed input into a csv formatter
+      .pipe(csv.format<Contacts, ContactsDetailsRow>({ headers: true }))
+      // Using the transform function from the formatting stream
+      .transform((row, next): void => {
+        const arr = [];
+        const { phoneNumber } = req.body;
+        Contact.findOne({ phoneNumber }, (err: any, contact: Contacts) => {
+          if (contact) {
+            arr.push(contact);
+            console.log("contact", contact)
+          }
+          return next(null, {
+            contactName: row.contactName,
+            phoneNumber: row.phoneNumber,
+          });
+        });
+        console.log('data', row);
+        Contact.updateOne(row);
+      })
+      .pipe(process.stdout)
+      .on('end', () => process.exit());
+    res.status(201).json('Contact uploaded');
+  } catch (err) {
+    console.log(err);
+    // next();
   }
 };
 

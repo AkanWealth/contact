@@ -19,6 +19,13 @@ interface Contacts {
   phoneNumber: string;
 }
 
+interface ContactsDetailsRow {
+  _id?: string;
+  contactName: string;
+  phoneNumber: string;
+}
+
+
 
 type Models = {
   [key: string]: ModelCtor<any>;
