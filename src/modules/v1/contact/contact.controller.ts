@@ -2,27 +2,79 @@ import mongoose from 'mongoose';
 import { success } from '../../common/utils';
 import Contact from '../../../database/models/contact.model';
 import { NextFunction, Request, Response } from 'express';
-// import { Books, ExcludedAttribs } from '../../../types';x
+import Logging from '../../common/Logging';
+import { Contacts, ExcludedAttribs } from '../../../types';
+import assert from 'assert';
+import { parse } from 'csv-parse';
+import { uploadCsv } from '../../shared/ContactUpload';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as csv from 'fast-csv';
 
+interface MulterRequest extends Request {
+  file: any;
+}
 // type Props = Omit<Books, ExcludedAttribs>;
 
- export const createContact = async (
+export const createContact = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const { contactName, phoneNumber } = req.body;
+    console.log(contactName, phoneNumber);
 
-    const contact = new Contact({
+    new Contact({
       _id: new mongoose.Types.ObjectId(),
       contactName,
       phoneNumber,
     });
-    await contact.save();
-    return res.status(201).json(success('Book created successfully', contact));
+    const createdContact = await Contact.insertMany(req.body);
+    return res
+      .status(201)
+      .json(success('Contact created successfully', createdContact));
   } catch (error) {
+    Logging.error(error);
+    console.log(error);
     return next(error);
+  }
+};
+
+export const BulkUpload = async (
+  req: MulterRequest,
+  res: Response,
+  // next: NextFunction
+) => {
+  try {
+    fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
+    .pipe(csv.parse({ headers: true }))
+    // pipe the parsed input into a csv formatter
+    .pipe(
+        csv.format<Contacts, Contacts>({ headers: true }),
+    )
+    // Using the transform function from the formatting stream
+    .transform((row, next): void => {
+        Contact.findById(+row._id, (err:any, contact: []) => {
+            return next(null, {
+                contactName: row.contactName,
+                phoneNumber: row.phoneNumber,
+            });
+        });
+    })
+    .pipe(process.stdout)
+    .on('end', () => process.exit());
+    // console.log("hi")
+    // uploadCsv(__dirname + '/uploads/' + req.file.filename);
+    // console.log('File has imported :');
+    // const documentFile = req.file;
+    // return res
+    //   .status(200)
+    //   .json(documentFile);
+      // .json(success('Contact upload successfully', { documentFile }));
+  } catch (err) {
+    console.log(err);
+    // next();
   }
 };
 
@@ -32,11 +84,11 @@ export const getContact = async (
   next: NextFunction
 ) => {
   try {
-    const contactId = req.params.bookId;
-    const book = await Contact.findById(contactId);
+    const { contactId } = req.params;
+    const contact = await Contact.findById(contactId);
     return res
       .status(200)
-      .json(success('Contact retrieved successfully', { book }));
+      .json(success('Contact retrieved successfully', { contact }));
   } catch (error) {
     return next(error);
   }
@@ -60,39 +112,25 @@ export const allContact = async (
 export const updateContact = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
-  try {
-    const contactId = req.params.bookId;
-    const updateContact = await Contact.findById(contactId);
-    if (updateContact) {
-      updateContact.set(req.body);
+  const { contactId } = req.params;
+  return await Contact.findById(contactId)
+    .then((contact) => {
+      if (contact) {
+        contact.set(req.body);
 
-      return updateContact.save();
-      // .then((book) => res.status(201).json({ book }))
-      // .catch((error) => res.status(500).json({ error }));
-    } else {
-      return res.status(404).json({ message: 'not found' });
-    }
-  } catch (error) {
-    next();
-  }
-  // const contactId = req.params.bookId;
-
-  // return await Contact.findById(contactId)
-  //   .then((book) => {
-  //     if (book) {
-  //       book.set(req.body);
-
-  //       return book
-  //         .save()
-  //         .then((book) => res.status(201).json({ book }))
-  //         .catch((error) => res.status(500).json({ error }));
-  //     } else {
-  //       return res.status(404).json({ message: 'not found' });
-  //     }
-  //   })
-  //   .catch((error) => res.status(500).json({ error }));
+        return contact
+          .save()
+          .then((contact) =>
+            res.status(201).json(success('Contact updated', { contact }))
+          )
+          .catch((error) => res.status(500).json({ error }));
+      } else {
+        return res.status(404).json({ message: 'not found' });
+      }
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
 
 export const deleteContact = async (
@@ -101,21 +139,10 @@ export const deleteContact = async (
   next: NextFunction
 ) => {
   try {
-    const contactId = req.params.bookId;
+    const { contactId } = req.params;
     const removeContact = await Contact.findByIdAndDelete(contactId);
-    return res.status(201).json(success('Contact deleted', { removeContact }));
+    return res.status(200).json(success('Contact deleted', { removeContact }));
   } catch (error) {
     next();
   }
-  // const contactId = req.params.bookId;
-
-  // return await Contact.findByIdAndDelete(contactId)
-  //   .then((book) =>
-  //     book
-  //       ? res.status(201).json({ book, message: 'Deleted' })
-  //       : res.status(404).json({ message: 'not found' })
-  //   )
-  //   .catch((error) => res.status(500).json({ error }));
 };
-
-// export default { createBook, readBook, readAll, updateBook, deleteBook };

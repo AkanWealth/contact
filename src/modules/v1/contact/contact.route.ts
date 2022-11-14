@@ -8,14 +8,19 @@ import {
   allContact,
   updateContact,
   deleteContact,
+  BulkUpload,
 } from '../contact/contact.controller';
+import { upload } from "../../common/upload"
 
 const app = express.Router();
 
 app.get('/', allContact);
 app.get('/:contactId', getContact);
 app.delete('/:contactId', deleteContact);
-app.post('/', contactCreationRules(), validate, createContact);
+app.post('/', createContact);
+app.post('/upload', upload.single("file"), 
+BulkUpload
+)
 app.patch(
   '/:contactId',
   contactUpdateRules(),

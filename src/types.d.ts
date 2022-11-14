@@ -13,16 +13,12 @@ interface User {
   deletedAt?: string;
 }
 
-interface Books {
+interface Contacts {
   _id?: string;
-  title: string;
-  author: string;
+  contactName: string;
+  phoneNumber: string;
 }
 
-interface Author {
-  _id?: string;
-  name: string;
-}
 
 type Models = {
   [key: string]: ModelCtor<any>;
