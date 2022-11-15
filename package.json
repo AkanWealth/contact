@@ -22,7 +22,7 @@
         "start": "node build/index.js",
         "deploy": "yarn migrate && yarn build && yarn start",
         "lint": "eslint --ext .ts --ignore-path .gitignore .",
-        "build": "tsc src/index.ts --outDir build --esModuleInterop --target es5 --moduleResolution node"
+        "build": "node build --output public"
     },
     "dependencies": {
         "@sentry/node": "^7.17.2",

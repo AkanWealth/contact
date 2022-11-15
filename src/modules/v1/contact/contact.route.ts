@@ -20,6 +20,6 @@ app.get('/:contactId', getContact);
 app.delete('/:contactId', deleteContact);
 app.post('/', createContact);
 app.post('/upload', upload.single('file'), BulkUpload);
-app.patch('/:contactId', contactUpdateRules(), updateContact);
+app.put('/:contactId', contactUpdateRules(), updateContact);
 
 export = app;

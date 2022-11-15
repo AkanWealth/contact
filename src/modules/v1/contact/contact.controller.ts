@@ -32,13 +32,11 @@ export const createContact = async (
       contactName,
       phoneNumber,
     });
-    const createdContact = await Contact.insertMany(req.body);
+    const createdContact = await Contact.create(req.body);
     return res
       .status(201)
       .json(success('Contact created successfully', createdContact));
   } catch (error) {
-    Logging.error(error);
-    console.log(error);
     return next(error);
   }
 };
