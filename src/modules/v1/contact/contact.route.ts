@@ -9,7 +9,6 @@ import {
   deleteContact,
   BulkUpload,
 } from '../contact/contact.controller';
-// import { upload } from "../../common/upload"
 import multer from 'multer';
 const upload = multer({ dest: 'src/modules/v1/contact/assets/' });
 
