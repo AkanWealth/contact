@@ -1,5 +1,4 @@
 import express from 'express';
-import { validate } from '../../common/utils';
 import { contactCreationRules } from './contact.validation';
 import { contactUpdateRules } from '../contact/contact.validation';
 import {
@@ -21,6 +20,6 @@ app.get('/:contactId', getContact);
 app.delete('/:contactId', deleteContact);
 app.post('/', createContact);
 app.post('/upload', upload.single('file'), BulkUpload);
-app.patch('/:contactId', contactUpdateRules(), validate, updateContact);
+app.patch('/:contactId', contactUpdateRules(), updateContact);
 
 export = app;

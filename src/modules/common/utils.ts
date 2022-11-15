@@ -2,7 +2,7 @@ import { captureException } from '@sentry/node';
 import { NextFunction, Response } from 'express';
 import { validationResult } from 'express-validator';
 
-import { AppError, CreateErr, User, AuthenticatedRequest } from '../../types';
+import { AppError, CreateErr } from '../../types';
 
 export const createError: CreateErr = (message, code = 403, validations = null) => {
   const err = new Error(message);
@@ -19,26 +19,6 @@ export const success = (msg: string, data: any, meta?: object) => ({
   message: msg,
   ...(meta && { meta }),
 });
-
-export async function Authenticate(req: AuthenticatedRequest, res: Response, next: NextFunction) {
-  try {
-    if (req.user) {
-      return next();
-    }
-
-    const authHeader = req.get('Authorization');
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-      throw createError('Authorization Header not provided!', 403);
-    }
-
-    // @ts-ignore
-    return next();
-  } catch (e) {
-    return next(e);
-  }
-}
 
 export function errorHandler(error: AppError, req: any, res: Response, _next: any) {
   try {
@@ -63,26 +43,3 @@ export function errorHandler(error: AppError, req: any, res: Response, _next: an
     return res.status(500).json({ status: false });
   }
 }
-
-export const forwardRequest = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  const { app } = req;
-  // eslint-disable-next-line no-underscore-dangle
-  return app._router.handle(req, res, next);
-};
-
-export const validate = (req: AuthenticatedRequest, _res: Response, next: NextFunction) => {
-  try {
-    const errors = validationResult(req);
-
-    if (errors.isEmpty()) {
-      return next();
-    }
-
-    const extractedErrors = [];
-    errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }));
-
-    throw createError('Validation failed', 400, extractedErrors);
-  } catch (e) {
-    return next(e);
-  }
-};
