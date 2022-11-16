@@ -113,6 +113,6 @@ const StartServer = () => {
     });
 });
 
-http.createServer(app).listen(dbConfig.server.port, () => console.log(`Server is running on port ${dbConfig.server.port}`));
+app.listen(dbConfig.server.port, () => console.log(`Server is running on port ${dbConfig.server.port}`));
 };
 export default app;
