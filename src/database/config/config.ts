@@ -7,7 +7,7 @@ const MONGO_PASSWORD = process.env.MONGO_PASSWORD || '';
 const MONGO_URL = `mongodb+srv://${MONGO_USERNAME}:${MONGO_PASSWORD}@cluster0.dfrar.mongodb.net/test_db`;
 
 
-const SERVER_PORT = process.env.SERVER_PORT ? Number(process.env.SERVER_PORT) : 1337;
+const PORT = process.env.PORT ? Number(process.env.PORT) : 1337;
 
 export const dbConfig = {
     mongo: {
@@ -16,6 +16,6 @@ export const dbConfig = {
         url: MONGO_URL
     },
     server: {
-        port: SERVER_PORT
+        port: PORT
     }
 };
