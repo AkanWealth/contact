@@ -25,22 +25,22 @@ const { SENTRY_DSN, NODE_ENV } = process.env;
 mongoose
   .connect(dbConfig.mongo.url, { retryWrites: true, w: 'majority' })
   .then(() => {
-    Logging.info('Mongo connected successfully.');
+    console.info('Mongo connected successfully.');
     StartServer();
   })
-  .catch((error) => Logging.error(error));
+  .catch((error) => console.error(error));
 
 const StartServer = () => {
   /** Log the request */
   app.use((req, res, next) => {
     /** Log the req */
-    Logging.info(
+    console.info(
       `Incomming - METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}]`
     );
 
     res.on('finish', () => {
       /** Log the res */
-      Logging.info(
+      console.info(
         `Result - METHOD: [${req.method}] - URL: [${req.url}] - IP: [${req.socket.remoteAddress}] - STATUS: [${res.statusCode}]`
       );
     });
@@ -106,13 +106,13 @@ const StartServer = () => {
   app.use((req, res, next) => {
     const error = new Error('Not found');
 
-    Logging.error(error);
+   console.log(error);
 
     res.status(404).json({
         message: error.message
     });
 });
 
-http.createServer(app).listen(dbConfig.server.port, () => Logging.info(`Server is running on port ${dbConfig.server.port}`));
+http.createServer(app).listen(dbConfig.server.port, () => console.log(`Server is running on port ${dbConfig.server.port}`));
 };
 export default app;
