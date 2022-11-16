@@ -84,14 +84,15 @@ const StartServer = () => {
     });
   }
 
-  app.use(
-    cors({
-      origin: (_origin, callback) => {
-        callback(null, true);
-      },
-      credentials: true,
-    })
-  );
+  app.use(cors())
+  // app.use(
+  //   cors({
+  //     origin: (_origin, callback) => {
+  //       callback(null, true);
+  //     },
+  //     credentials: true,
+  //   }),
+  // );
 
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(express.json({ limit: '10mb' }));
