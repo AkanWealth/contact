@@ -84,7 +84,7 @@ const StartServer = () => {
     });
   }
 
-  app.use(cors({origin:"https://beamish-bunny-c576a0.netlify.app/"}))
+  app.use(cors({origin:"https://beamish-bunny-c576a0.netlify.app"}))
   // app.use(
   //   cors({
   //     origin: (_origin, callback) => {
