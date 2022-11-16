@@ -84,7 +84,7 @@ const StartServer = () => {
     });
   }
 
-  app.use(cors({origin:"https://beamish-bunny-c576a0.netlify.app"}))
+  app.use(cors({ origin: 'https://beamish-bunny-c576a0.netlify.app' }));
   // app.use(
   //   cors({
   //     origin: (_origin, callback) => {
@@ -105,15 +105,18 @@ const StartServer = () => {
   app.use(errorHandler);
 
   app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
     const error = new Error('Not found');
 
-   console.log(error);
+    console.log(error);
 
     res.status(404).json({
-        message: error.message
+      message: error.message,
     });
-});
+  });
 
-app.listen(dbConfig.server.port, () => console.log(`Server is running on port ${dbConfig.server.port}`));
+  app.listen(dbConfig.server.port, () =>
+    console.log(`Server is running on port ${dbConfig.server.port}`)
+  );
 };
 export default app;
