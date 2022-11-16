@@ -84,7 +84,7 @@ const StartServer = () => {
     });
   }
 
-  app.use(cors())
+  app.use(cors({origin:"https://contacttask.herokuapp.com"}))
   // app.use(
   //   cors({
   //     origin: (_origin, callback) => {
