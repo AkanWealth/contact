@@ -8,6 +8,7 @@ import {
   updateContact,
   deleteContact,
   BulkUpload,
+  bulkDelete,
 } from '../contact/contact.controller';
 import multer from 'multer';
 // const upload = multer({ dest: 'src/modules/v1/contact/assets/' });
@@ -21,5 +22,6 @@ app.delete('/:contactId', deleteContact);
 app.post('/', createContact);
 app.post('/upload', upload.single('file'), BulkUpload);
 app.put('/:contactId', contactUpdateRules(), updateContact);
+app.delete('/', contactUpdateRules(), bulkDelete);
 
 export = app;
