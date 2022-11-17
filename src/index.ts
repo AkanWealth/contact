@@ -96,7 +96,7 @@ const StartServer = () => {
   // );
 
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(express.static(path.join(__dirname, 'src/modules/v1/contact/assets')));
+  app.use(express.static(path.join(__dirname, '../src/modules/v1/contact/assets/')));
   app.use(express.json({ limit: '10mb' }));
   app.disable('x-powered-by');
 
