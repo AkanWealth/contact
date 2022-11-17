@@ -7,6 +7,7 @@ import compression from 'compression';
 import * as Sentry from '@sentry/node';
 import express, { Request } from 'express';
 import * as Tracing from '@sentry/tracing';
+import path from "path";
 
 import routes from './routes';
 import mongoose from 'mongoose';
@@ -95,6 +96,7 @@ const StartServer = () => {
   // );
 
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.static(path.join(__dirname, 'src/modules/v1/contact/assets')));
   app.use(express.json({ limit: '10mb' }));
   app.disable('x-powered-by');
 
