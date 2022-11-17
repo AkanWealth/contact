@@ -3,10 +3,8 @@ import { success } from '../../common/utils';
 import Contact from '../../../database/models/contact.model';
 import { NextFunction, Request, Response } from 'express';
 import Logging from '../../common/Logging';
-import { Contacts, ContactsDetailsRow, ExcludedAttribs } from '../../../types';
-import assert from 'assert';
-// import { parse } from 'csv-parse';
-// import { uploadCsv } from '../../shared/ContactUpload';
+// import { Contacts, ContactsDetailsRow, ExcludedAttribs } from '../../../types';
+// import assert from 'assert';
 import fs from 'fs';
 import * as path from 'path';
 import * as csv from 'fast-csv';
@@ -16,7 +14,6 @@ import { parse } from '@fast-csv/parse';
 interface MulterRequest extends Request {
   file: any;
 }
-// type Props = Omit<Books, ExcludedAttribs>;
 
 export const createContact = async (
   req: Request,
