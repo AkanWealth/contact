@@ -10,7 +10,8 @@ import {
   BulkUpload,
 } from '../contact/contact.controller';
 import multer from 'multer';
-const upload = multer({ dest: 'src/modules/v1/contact/assets/' });
+// const upload = multer({ dest: 'src/modules/v1/contact/assets/' });
+const upload = multer({ dest: 'assets' });
 
 const app = express.Router();
 

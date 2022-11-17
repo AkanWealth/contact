@@ -8,8 +8,6 @@ import Logging from '../../common/Logging';
 import fs from 'fs';
 import * as path from 'path';
 import * as csv from 'fast-csv';
-import { EOL } from 'os';
-import { parse } from '@fast-csv/parse';
 
 interface MulterRequest extends Request {
   file: any;
@@ -44,7 +42,7 @@ export const BulkUpload = async (
   next: NextFunction
 ) => {
   try {
-    fs.createReadStream(path.resolve(__dirname, 'assets', req.file.filename))
+    fs.createReadStream(path.resolve(__dirname, '../../../../assets/', req.file.filename))
       .pipe(csv.parse({ headers: true }))
       .on('error', (error) => console.error(error))
       .on('data', async (row) => {

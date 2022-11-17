@@ -15,6 +15,8 @@ import { dbConfig } from './database/config/config';
 import Logging from './modules/common/Logging';
 import rateLimit from 'express-rate-limit';
 import { errorHandler } from './modules/common/utils';
+import multer from 'multer';
+import { BulkUpload } from './modules/v1/contact/contact.controller';
 
 config();
 
@@ -96,26 +98,31 @@ const StartServer = () => {
   // );
 
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-  app.use(express.static(path.join(__dirname, '../src/modules/v1/contact/assets/')));
+  // app.use(express.static(path.join(__dirname, './modules/v1/contact/assets/')));
+  app.use(express.static(path.join(__dirname, '/assets/')));
   app.use(express.json({ limit: '10mb' }));
   app.disable('x-powered-by');
 
+  
+  // const upload = multer({ dest: 'assets/' });
+  // app.use('/upload', upload.single('file'), BulkUpload);
+  
   app.use('/', apiLimiter, routes);
 
   // Error handlers
   app.use(Sentry.Handlers.errorHandler());
   app.use(errorHandler);
 
-  app.use(function(req,res,next) {
-    req.connection.setNoDelay(true)
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    // res.header("Access-Control-Allow-Credentials", true);
-        res.header("Access-Control-Allow-Origin", "https://beamish-bunny-c576a0.netlify.app"); 
+//   app.use(function(req,res,next) {
+//     req.connection.setNoDelay(true)
+//     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//     // res.header("Access-Control-Allow-Credentials", true);
+//         res.header("Access-Control-Allow-Origin", "https://beamish-bunny-c576a0.netlify.app"); 
 
-    res.header('Access-Control-Expose-Headers', 'agreementrequired');
+//     res.header('Access-Control-Expose-Headers', 'agreementrequired');
   
-    next()
-})
+//     next()
+// })
 
   app.use((req, res, next) => {
     const error = new Error('Not found');
